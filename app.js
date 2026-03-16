@@ -33,8 +33,34 @@ let lasers = [];
 let lives = 3;
 let points = 0;
 
+
+let gameOver = false;
+let win = false;
+
 // prevent arrow keys from scrolling the page
 window.addEventListener("keydown", function(e) {
+
+  window.addEventListener("keydown", (e) => {
+
+  if (gameOver && e.key === "Enter") {
+
+    enemies = [];
+    lasers = [];
+
+    lives = 3;
+    points = 0;
+
+    gameOver = false;
+    win = false;
+
+    hero.x = canvas.width / 2 - 45;
+    hero.y = canvas.height - canvas.height / 4;
+
+    createEnemies();
+
+  }
+
+});
   if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) {
     e.preventDefault();
   }
@@ -73,19 +99,19 @@ window.addEventListener("keydown", (e) => {
   switch (e.key) {
 
     case "ArrowLeft":
-      hero.x -= 5;
+      hero.x -= 6;
       break;
 
     case "ArrowRight":
-      hero.x += 5;
+      hero.x += 6;
       break;
 
     case "ArrowUp":
-      hero.y -= 5;
+      hero.y -=6;
       break;
 
     case "ArrowDown":
-      hero.y += 5;
+      hero.y += 6;
       break;
 
     case " ":
@@ -119,9 +145,7 @@ function moveLasers() {
 
 // check if lasers hit enemies
 function detectCollisions() {
-
   lasers.forEach((laser, lIndex) => {
-
     enemies.forEach((enemy, eIndex) => {
 
       // simple rectangle collision check
@@ -131,7 +155,6 @@ function detectCollisions() {
         laser.y < enemy.y + enemy.height &&
         laser.y + laser.height > enemy.y
       ){
-
         // remove enemy and laser if they collide
         enemies.splice(eIndex, 1);
         lasers.splice(lIndex, 1);
@@ -141,25 +164,31 @@ function detectCollisions() {
       }
     });
   });
+
+  if (enemies.length === 0) {
+  win = true;
+  gameOver = true;
+}
+
 }
 
 // check if hero collides with enemy
 function detectHeroCollision() {
-
   enemies.forEach((enemy, index) => {
-
     if (
       hero.x < enemy.x + enemy.width &&
       hero.x + 98 > enemy.x &&
       hero.y < enemy.y + enemy.height &&
       hero.y + 75 > enemy.y
     ) {
-
       enemies.splice(index, 1);
       lives--;
-
     }
   });
+
+  if (lives <= 0) {
+  gameOver = true;
+}
 }
 
 // draw points on screen
@@ -190,6 +219,20 @@ function drawLife() {
 
 // main game loop
 function gameLoop() {
+
+  if (gameOver) {
+  ctx.font = "40px Arial";
+  ctx.fillStyle = win ? "green" : "red";
+  ctx.textAlign = "center";
+
+  if (win) {
+    ctx.fillText("YOU WIN! Press Enter to restart", canvas.width / 2, canvas.height / 2);
+  } else {
+    ctx.fillText("GAME OVER! Press Enter to restart", canvas.width / 2, canvas.height / 2);
+  }
+
+  return;
+}
 
   // clear previous frame
   ctx.clearRect(0, 0, canvas.width, canvas.height);
